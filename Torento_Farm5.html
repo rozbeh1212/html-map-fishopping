@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Filter symbols by toggling a list</title>
+    <meta
+      name="viewport"
+      content="initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
+    <script src="http://tabatabaee.info/scripts/map.js"></script>
+    <link
+      href="http://tabatabaee.info/scripts/mapbox-gl.css"
+      rel="stylesheet"
+    />
+    <script src="https://code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script src="https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.js"></script>
+    <link
+      href="https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="path/to/font-awesome/css/font-awesome.min.css"
+    />
+
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+      }
+
+      #map {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 100%;
+      }
+    </style>
+  </head>
+
+  <body>
+    <style>
+      .filter-group {
+        font: 12px/20px "Helvetica Neue", Arial, Helvetica, sans-serif;
+        font-weight: 600;
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 1;
+        border-radius: 3px;
+        width: 120px;
+        color: #fff;
+      }
+
+      .filter-group input[type="checkbox"]:first-child + label {
+        border-radius: 3px 3px 0 0;
+      }
+
+      .filter-group label:last-child {
+        border-radius: 0 0 3px 3px;
+        border: none;
+      }
+
+      .filter-group input[type="checkbox"] {
+        display: none;
+      }
+
+      .filter-group input[type="checkbox"] + label {
+        background-color: #3386c0;
+        display: block;
+        cursor: pointer;
+        padding: 10px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+      }
+
+      .filter-group input[type="checkbox"] + label {
+        background-color: #3386c0;
+        text-transform: capitalize;
+      }
+
+      .filter-group input[type="checkbox"] + label:hover,
+      .filter-group input[type="checkbox"]:checked + label {
+        background-color: #4ea0da;
+      }
+
+      .filter-group input[type="checkbox"]:checked + label:before {
+        content: "✔";
+        margin-right: 5px;
+      }
+    </style>
+    <div id="map" />
+
+    <nav id="filter-group" class="filter-group"></nav>
+
+    <script>
+      var map = initMap("map");
+
+      mapboxgl.accessToken =
+        "pk.eyJ1Ijoicm96YmVoIiwiYSI6ImNrNGY4OXl0NDBrNmYzbHFxa2NidGo1MDcifQ.lkv4HzCfHC4JvNEp7-TkLw";
+      var places = {
+        type: "FeatureCollection",
+        features: [
+          {
+            type: "Feature",
+            properties: {
+              description: "theatre",
+
+              icon: "theatre",
+            },
+            geometry: {
+              type: "Point",
+              coordinates: [-75.038659, 38.931567],
+            },
+          },
+          {
+            type: "Feature",
+            properties: {
+              description: "theatre",
+
+              icon: "theatre",
+            },
+            geometry: {
+              type: "Point",
+              coordinates: [-73.003168, 38.894651],
+            },
+          },
+          {
+            type: "Feature",
+            properties: {
+              description: "water",
+
+              icon: "bar",
+            },
+            geometry: {
+              type: "Point",
+              coordinates: [-79.585579, 43.103802],
+            },
+          },
+          {
+            type: "Feature",
+            properties: {
+              icon: "bicycle",
+            },
+            geometry: {
+              type: "Point",
+              coordinates: [-77.052477, 38.943951],
+            },
+          },
+          {
+            type: "Feature",
+
+            properties: {
+              description: "music",
+
+              icon: "music",
+            },
+            geometry: {
+              type: "Point",
+              coordinates: [-79.085579, 43.103802],
+            },
+          },
+          {
+            type: "Feature",
+
+            properties: {
+              description: "alcohol-shop",
+
+              icon: "alcohol-shop",
+            },
+            geometry: {
+              type: "Point",
+              coordinates: [-80.07552, 43.91844],
+            },
+          },
+
+          {
+            type: "Feature",
+
+            properties: {
+              description: "beer",
+
+              icon: "beer",
+            },
+            geometry: {
+              type: "Point",
+              coordinates: [-80.18652, 43.91844],
+            },
+          },
+          {
+            type: "Feature",
+
+            properties: {
+              description: "cafe",
+
+              icon: "cafe",
+            },
+            geometry: {
+              type: "Point",
+              coordinates: [-83.18652, 43.91844],
+            },
+          },
+          {
+            type: "Feature",
+
+            properties: {
+              description: "restaurant",
+
+              icon: "restaurant",
+            },
+            geometry: {
+              type: "Point",
+              coordinates: [-81.28652, 43.91844],
+            },
+          },
+          {
+            type: "Feature",
+
+            properties: {
+              description: "water",
+
+              icon: "drinking-water",
+            },
+            geometry: {
+              type: "Point",
+              coordinates: [-81.40652, 43.91844],
+            },
+          },
+          {
+            type: "Feature",
+
+            properties: {
+              description: "water",
+
+              icon: "local_florist",
+            },
+            geometry: {
+              type: "Point",
+              coordinates: [-81.55652, 43.91844],
+            },
+          },
+        ],
+      };
+
+      var filterGroup = document.getElementById("filter-group");
+      var map = new mapboxgl.Map({
+        container: "map",
+        style: "mapbox://styles/mapbox/streets-v11",
+        center: [-79.559377, 43.708816],
+        zoom: 9.5,
+      });
+
+      map.on("load", function () {
+        // Add a GeoJSON source containing place coordinates and information.
+        map.addSource("places", {
+          type: "geojson",
+          data: places,
+        });
+
+        places.features.forEach(function (feature) {
+          var symbol = feature.properties["icon"];
+          var layerID = "poi-" + symbol;
+
+          // Add a layer for this symbol type if it hasn't been added already.
+          if (!map.getLayer(layerID)) {
+            map.addLayer({
+              id: layerID,
+              type: "symbol",
+              source: "places",
+              layout: {
+                "icon-image": symbol + "-15",
+                "icon-allow-overlap": true,
+                "icon-size": 2,
+              },
+              filter: ["==", "icon", symbol],
+            });
+
+            // Add checkbox and label elements for the layer.
+            var input = document.createElement("input");
+            input.type = "checkbox";
+            input.id = layerID;
+            input.checked = true;
+            filterGroup.appendChild(input);
+
+            var label = document.createElement("label");
+            label.setAttribute("for", layerID);
+            label.textContent = symbol;
+            filterGroup.appendChild(label);
+
+            // When the checkbox changes, update the visibility of the layer.
+            input.addEventListener("change", function (e) {
+              map.setLayoutProperty(
+                layerID,
+                "visibility",
+                e.target.checked ? "visible" : "none"
+              );
+            });
+          }
+
+          var popup = new mapboxgl.Popup({
+            closeButton: false,
+            closeOnClick: false,
+          });
+
+          map.on("mouseenter", layerID, function (e) {
+            // Change the cursor style as a UI indicator.
+            map.getCanvas().style.cursor = "pointer";
+
+            var coordinates = e.features[0].geometry.coordinates.slice();
+            var description = e.features[0].properties.description;
+
+            // Ensure that if the map is zoomed out such that multiple
+            // copies of the feature are visible, the popup appears
+            // over the copy being pointed to.
+            while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+              coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+            }
+
+            // Populate the popup and set its coordinates
+            // based on the feature found.
+            popup.setLngLat(coordinates).setHTML(description).addTo(map);
+          });
+
+          map.on("mouseleave", layerID, function () {
+            map.getCanvas().style.cursor = "";
+            popup.remove();
+          });
+
+          // map.on('click', layerID, function (e) {
+          //     new mapboxgl.Popup()
+          //         .setLngLat(e.lngLat)
+          //         .setHTML(e.features[0].properties.description)
+          //         .addTo(map);
+          // });
+
+          // map.on('click', layerID, function () {
+          //     map.getCanvas().style.cursor = 'pointer';
+          // });
+
+          // // Change it back to a pointer when it leaves.
+          // map.on('mouseleave', layerID, function () {
+          //     map.getCanvas().style.cursor = '';
+          // });
+        });
+      });
+    </script>
+  </body>
+</html>
